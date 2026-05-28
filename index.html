@@ -328,10 +328,15 @@
     .cal-cell:nth-child(7n) { border-right: none; }
     .cal-cell:hover:not(.empty-cell):not(.weekend-cell) { background: #F0EDE8; }
     .cal-cell.empty-cell, .cal-cell.weekend-cell { background: var(--cream); cursor: default; }
-    .cal-cell.past-cell { opacity: 0.65; }
+    .cal-cell.past-cell { background: #F5F2EE; }
+    .cal-cell.past-cell .day-num { color: #C4BAB0; text-decoration: line-through; text-decoration-color: #D4CCC5; }
+    .cal-cell.past-cell .day-badge { opacity: 0.65; }
+    .cal-cell.past-cell:hover:not(.weekend-cell) { background: #EDE9E4; }
 
     .cal-cell.has-verlof-full { background: #E8F5EE; }
     .cal-cell.has-verlof-half { background: #EFF8F3; }
+    .cal-cell.past-cell.has-verlof-full { background: #DFF0E7; }
+    .cal-cell.past-cell.has-verlof-half { background: #E7F2EC; }
 
     .day-num {
       font-size: 13px;
@@ -345,6 +350,7 @@
       border-radius: 50%;
     }
 
+    .today-cell { border-top: 2px solid var(--accent) !important; }
     .today-cell .day-num {
       background: var(--accent);
       color: white;
