@@ -38,11 +38,7 @@
 
     /* CONFIG SCREEN */
     #configScreen {
-      min-height: 100vh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 2rem;
+      display: none !important;
     }
 
     .config-card {
@@ -957,20 +953,23 @@
     renderCalendar();
   };
 
-  // Auto-load from localStorage if config exists
+  // Auto-start met vaste Firebase gegevens
   (async function() {
-    const saved = localStorage.getItem('verlof_config');
-    const savedUren = localStorage.getItem('verlof_uren');
-    if (saved) {
-      const cfg = JSON.parse(saved);
-      document.getElementById('apiKey').value = cfg.apiKey;
-      document.getElementById('projectId').value = cfg.projectId;
-      document.getElementById('appId').value = cfg.appId;
-      if (savedUren) {
-        totalUren = parseFloat(savedUren);
-        document.getElementById('configUren').value = totalUren;
-      }
-      await window.startApp();
+    try {
+      const firebaseConfig = {
+        apiKey: "AIzaSyD4mYHhgCTWL2t9hOKRLX4tJ_IezS9LFOE",
+        authDomain: "verlof-planner.firebaseapp.com",
+        projectId: "verlof-planner",
+        storageBucket: "verlof-planner.firebasestorage.app",
+        messagingSenderId: "80919723816",
+        appId: "1:80919723816:web:aaf9bbdc5fec95bfa15a1d"
+      };
+      const fbApp = initializeApp(firebaseConfig);
+      db = getFirestore(fbApp);
+      await loadData();
+      showApp();
+    } catch(e) {
+      document.getElementById('loadingMsg').textContent = 'Fout bij laden: ' + e.message;
     }
   })();
 </script>
