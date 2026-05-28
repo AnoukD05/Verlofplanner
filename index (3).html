@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verlofplanner</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,500;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cream: #F7F3EE;
+      --warm-white: #FDFBF8;
+      --ink: #1C1917;
+      --ink-soft: #57534E;
+      --ink-muted: #A8A29E;
+      --accent: #2D6A4F;
+      --accent-light: #D8F3DC;
+      --accent-mid: #74C69D;
+      --amber: #B45309;
+      --amber-light: #FEF3C7;
+      --red: #9B2335;
+      --red-light: #FEE2E2;
+      --blue: #1E3A5F;
+      --blue-light: #DBEAFE;
+      --border: #E7E0D8;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      min-height: 100vh;
+    }
+
+    /* CONFIG SCREEN */
+    #configScreen {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+
+    .config-card {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3rem;
+      max-width: 480px;
+      width: 100%;
+    }
+
+    .config-card h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 32px;
+      font-weight: 400;
+      color: var(--ink);
+      margin-bottom: 0.5rem;
+    }
+
+    .config-card p {
+      color: var(--ink-soft);
+      font-size: 15px;
+      margin-bottom: 2rem;
+      line-height: 1.6;
+    }
+
+    .config-card label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--ink-soft);
+      margin-bottom: 6px;
+      letter-spacing: 0.03em;
+    }
+
+    .config-card input {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      background: var(--cream);
+      color: var(--ink);
+      margin-bottom: 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    .config-card input:focus { border-color: var(--accent); }
+
+    .config-card input[type="number"] { width: 160px; }
+
+    .config-steps {
+      background: var(--cream);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      font-size: 13px;
+      color: var(--ink-soft);
+      line-height: 1.8;
+    }
+
+    .config-steps a { color: var(--accent); }
+    .config-steps code {
+      background: var(--border);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 12px 24px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      width: 100%;
+      transition: opacity 0.2s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+
+    /* MAIN APP */
+    #app { display: none; }
+
+    .topbar {
+      background: var(--warm-white);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .topbar h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 400;
+      color: var(--ink);
+    }
+
+    .topbar-uren {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--ink-soft);
+    }
+
+    .topbar-uren input {
+      width: 70px;
+      padding: 4px 8px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: 'DM Sans', sans-serif;
+      background: var(--cream);
+      color: var(--ink);
+      text-align: center;
+    }
+
+    .main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+
+    /* STATS */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 300;
+      color: var(--ink);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-value.green { color: var(--accent); }
+    .stat-value.amber { color: var(--amber); }
+    .stat-value.red { color: var(--red); }
+
+    .stat-sub {
+      font-size: 12px;
+      color: var(--ink-muted);
+    }
+
+    /* PROGRESS */
+    .progress-wrap {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      margin-bottom: 2rem;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 13px;
+      color: var(--ink-soft);
+      margin-bottom: 10px;
+    }
+
+    .progress-track {
+      background: var(--cream);
+      border-radius: 999px;
+      height: 10px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: var(--accent);
+      transition: width 0.5s ease;
+    }
+
+    /* CALENDAR */
+    .cal-section {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      margin-bottom: 2rem;
+    }
+
+    .cal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cal-header h2 {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 400;
+    }
+
+    .cal-nav-btns { display: flex; gap: 6px; }
+
+    .icon-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      width: 34px;
+      height: 34px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      color: var(--ink-soft);
+      transition: background 0.15s;
+    }
+    .icon-btn:hover { background: var(--cream); }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .cal-day-head {
+      padding: 10px 4px;
+      text-align: center;
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      color: var(--ink-muted);
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cal-cell {
+      min-height: 60px;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 8px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      transition: background 0.1s;
+      position: relative;
+    }
+
+    .cal-cell:nth-child(7n) { border-right: none; }
+    .cal-cell:hover:not(.empty-cell):not(.weekend-cell):not(.past-cell) { background: #F0EDE8; }
+    .cal-cell.empty-cell, .cal-cell.weekend-cell { background: var(--cream); cursor: default; }
+    .cal-cell.past-cell { opacity: 0.4; cursor: default; }
+
+    .cal-cell.has-verlof-full { background: #E8F5EE; }
+    .cal-cell.has-verlof-half { background: #EFF8F3; }
+
+    .day-num {
+      font-size: 13px;
+      font-weight: 400;
+      color: var(--ink);
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+
+    .today-cell .day-num {
+      background: var(--accent);
+      color: white;
+      font-weight: 500;
+    }
+
+    .day-badge {
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 999px;
+    }
+
+    .badge-full { background: var(--accent-light); color: var(--accent); }
+    .badge-half { background: #D1FAE5; color: #065F46; }
+    .badge-thu { background: var(--blue-light); color: var(--blue); }
+
+    /* LIST */
+    .list-section h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 18px;
+      font-weight: 400;
+      margin-bottom: 1rem;
+    }
+
+    .verlof-item {
+      background: var(--warm-white);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      transition: border-color 0.15s;
+    }
+
+    .verlof-item:hover { border-color: #C8BFB5; }
+
+    .verlof-info { display: flex; flex-direction: column; gap: 2px; }
+    .verlof-date { font-size: 15px; font-weight: 500; color: var(--ink); }
+    .verlof-type { font-size: 12px; color: var(--ink-soft); }
+    .verlof-uren { font-size: 13px; color: var(--ink-muted); margin-right: 12px; }
+
+    .del-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      padding: 6px 8px;
+      cursor: pointer;
+      color: var(--ink-muted);
+      font-size: 16px;
+      transition: all 0.15s;
+      line-height: 1;
+    }
+    .del-btn:hover { background: var(--red-light); color: var(--red); border-color: #FCA5A5; }
+
+    .empty-state {
+      text-align: center;
+      padding: 2.5rem;
+      color: var(--ink-muted);
+      font-size: 14px;
+      font-style: italic;
+    }
+
+    /* MODAL */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(28, 25, 23, 0.4);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal-backdrop.open { display: flex; }
+
+    .modal-box {
+      background: var(--warm-white);
+      border-radius: 20px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 360px;
+      border: 1px solid var(--border);
+    }
+
+    .modal-box h3 {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 400;
+      margin-bottom: 4px;
+    }
+
+    .modal-date-label {
+      font-size: 13px;
+      color: var(--ink-soft);
+      margin-bottom: 1.5rem;
+    }
+
+    .modal-opts { display: flex; flex-direction: column; gap: 10px; margin-bottom: 1.5rem; }
+
+    .modal-opt {
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+      cursor: pointer;
+      background: transparent;
+      text-align: left;
+      font-family: 'DM Sans', sans-serif;
+      transition: all 0.15s;
+    }
+
+    .modal-opt:hover { background: var(--cream); }
+    .modal-opt.selected { background: var(--accent-light); border-color: var(--accent-mid); }
+
+    .modal-opt-title { font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+    .modal-opt-sub { font-size: 12px; color: var(--ink-soft); }
+    .modal-opt.selected .modal-opt-sub { color: var(--accent); }
+
+    .modal-actions { display: flex; gap: 8px; }
+
+    .btn-cancel {
+      flex: 1;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 11px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      cursor: pointer;
+      color: var(--ink-soft);
+      transition: background 0.15s;
+    }
+    .btn-cancel:hover { background: var(--cream); }
+
+    .btn-confirm {
+      flex: 2;
+      background: var(--accent);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-confirm:hover { opacity: 0.88; }
+    .btn-confirm:disabled { opacity: 0.35; cursor: default; }
+
+    .btn-delete {
+      flex: 2;
+      background: var(--red);
+      color: white;
+      border: none;
+      border-radius: var(--radius-sm);
+      padding: 11px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .btn-delete:hover { opacity: 0.88; }
+
+    .loading {
+      text-align: center;
+      padding: 3rem;
+      color: var(--ink-muted);
+      font-style: italic;
+    }
+
+    .error-msg {
+      background: var(--red-light);
+      color: var(--red);
+      border: 1px solid #FCA5A5;
+      border-radius: var(--radius-sm);
+      padding: 1rem;
+      font-size: 14px;
+      margin-bottom: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- CONFIG SCREEN -->
+<div id="configScreen">
+  <div class="config-card">
+    <h1>🌿 Verlofplanner</h1>
+    <p>Voer je Firebase-gegevens in om te beginnen. Dit is eenmalig — daarna onthoudt de app alles.</p>
+
+    <div class="config-steps">
+      <strong>Hoe Firebase instellen?</strong><br>
+      1. Ga naar <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a><br>
+      2. Maak een nieuw project aan<br>
+      3. Ga naar <strong>Firestore Database</strong> → maak een database aan (test mode)<br>
+      4. Ga naar <strong>Projectinstellingen</strong> → Jouw apps → voeg een web-app toe<br>
+      5. Kopieer de gegevens hieronder:<br><br>
+      6. Ga naar <strong>Firestore</strong> → Rules → vervang door:<br>
+      <code>allow read, write: if true;</code>
+    </div>
+
+    <div id="configError" class="error-msg" style="display:none"></div>
+
+    <label>API Key</label>
+    <input type="text" id="apiKey" placeholder="AIzaSy...">
+
+    <label>Project ID</label>
+    <input type="text" id="projectId" placeholder="mijn-verlofplanner-12345">
+
+    <label>App ID</label>
+    <input type="text" id="appId" placeholder="1:123456:web:abc...">
+
+    <label>Totaal verlofuren dit jaar</label>
+    <input type="number" id="configUren" value="140" min="0" max="999" step="0.5">
+
+    <button class="btn-primary" onclick="startApp()">Verbinden & starten →</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="topbar">
+    <h1>🌿 Verlofplanner</h1>
+    <div class="topbar-uren">
+      <span>Totaal uren:</span>
+      <input type="number" id="totalUrenInput" value="140" min="0" max="999" step="0.5" onchange="saveTotalUren()">
+      <span style="font-size:12px;color:var(--ink-muted)">| <span id="syncStatus">●</span></span>
+    </div>
+  </div>
+
+  <div class="main">
+    <div id="loadingMsg" class="loading">Verlofplanner laden...</div>
+    <div id="mainContent" style="display:none">
+
+      <div class="stats-grid" id="statsGrid"></div>
+
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Opgenomen verlof</span>
+          <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill" style="width:0%"></div>
+        </div>
+      </div>
+
+      <div class="cal-section">
+        <div class="cal-header">
+          <h2 id="calTitle"></h2>
+          <div class="cal-nav-btns">
+            <button class="icon-btn" onclick="changeMonth(-1)">&#8249;</button>
+            <button class="icon-btn" onclick="changeMonth(1)">&#8250;</button>
+          </div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-day-head">Ma</div>
+          <div class="cal-day-head">Di</div>
+          <div class="cal-day-head">Wo</div>
+          <div class="cal-day-head">Do</div>
+          <div class="cal-day-head">Vr</div>
+          <div class="cal-day-head" style="color:var(--border)">Za</div>
+          <div class="cal-day-head" style="color:var(--border)">Zo</div>
+        </div>
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+
+      <div class="list-section">
+        <h3>Geplande verlofdagen</h3>
+        <div id="verlofList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal-box">
+    <h3 id="modalTitle">Verlof toevoegen</h3>
+    <div class="modal-date-label" id="modalDateLabel"></div>
+    <div class="modal-opts" id="modalOpts"></div>
+    <div class="modal-actions" id="modalActions"></div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import { getFirestore, doc, getDoc, setDoc, deleteDoc, collection, getDocs, onSnapshot } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  const MONTHS = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
+  const DAYS_NL = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
+  const FULL = 7.42, HALF = 3.21, THU = 3.21;
+
+  let db, verlofData = {}, totalUren = 140;
+  let curYear = new Date().getFullYear();
+  let curMonth = new Date().getMonth();
+  let selectedDate = null, selectedOpt = null, modalMode = 'add';
+  const today = new Date(); today.setHours(0,0,0,0);
+
+  function toStr(d) {
+    return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+  }
+
+  function isThu(d) { return new Date(d).getDay() === 4; }
+  function isWeekend(d) { const day = new Date(d).getDay(); return day === 0 || day === 6; }
+
+  function hoursFor(dateStr, type) {
+    return isThu(dateStr) ? THU : type === 'full' ? FULL : HALF;
+  }
+
+  function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    return DAYS_NL[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()] + ' ' + d.getFullYear();
+  }
+
+  window.startApp = async function() {
+    const apiKey = document.getElementById('apiKey').value.trim();
+    const projectId = document.getElementById('projectId').value.trim();
+    const appId = document.getElementById('appId').value.trim();
+    totalUren = parseFloat(document.getElementById('configUren').value) || 140;
+
+    if (!apiKey || !projectId || !appId) {
+      showConfigError('Vul alle velden in.');
+      return;
+    }
+
+    try {
+      const firebaseConfig = {
+        apiKey, projectId, appId,
+        authDomain: projectId + '.firebaseapp.com',
+        storageBucket: projectId + '.appspot.com',
+      };
+
+      const fbApp = initializeApp(firebaseConfig);
+      db = getFirestore(fbApp);
+
+      // Save config
+      localStorage.setItem('verlof_config', JSON.stringify({ apiKey, projectId, appId }));
+      localStorage.setItem('verlof_uren', totalUren);
+
+      await loadData();
+      showApp();
+    } catch(e) {
+      showConfigError('Kan niet verbinden: ' + e.message);
+    }
+  };
+
+  function showConfigError(msg) {
+    const el = document.getElementById('configError');
+    el.textContent = msg;
+    el.style.display = 'block';
+  }
+
+  async function loadData() {
+    const snap = await getDocs(collection(db, 'verlof'));
+    verlofData = {};
+    snap.forEach(d => { verlofData[d.id] = d.data(); });
+
+    const metaSnap = await getDoc(doc(db, 'meta', 'settings'));
+    if (metaSnap.exists()) {
+      totalUren = metaSnap.data().totalUren || totalUren;
+    } else {
+      await setDoc(doc(db, 'meta', 'settings'), { totalUren });
+    }
+  }
+
+  function showApp() {
+    document.getElementById('configScreen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('totalUrenInput').value = totalUren;
+
+    // Live sync
+    onSnapshot(collection(db, 'verlof'), snap => {
+      verlofData = {};
+      snap.forEach(d => { verlofData[d.id] = d.data(); });
+      render();
+      setSyncStatus('✓', 'var(--accent)');
+    });
+
+    document.getElementById('loadingMsg').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    render();
+  }
+
+  function setSyncStatus(symbol, color) {
+    const el = document.getElementById('syncStatus');
+    el.textContent = symbol;
+    el.style.color = color;
+  }
+
+  window.saveTotalUren = async function() {
+    totalUren = parseFloat(document.getElementById('totalUrenInput').value) || 140;
+    localStorage.setItem('verlof_uren', totalUren);
+    await setDoc(doc(db, 'meta', 'settings'), { totalUren });
+    render();
+  };
+
+  function totalUsed() {
+    return Object.entries(verlofData).reduce((sum, [date, v]) => sum + hoursFor(date, v.type), 0);
+  }
+
+  function render() {
+    const used = totalUsed();
+    const remaining = totalUren - used;
+    const fullDays = Math.floor(remaining / FULL);
+    const pct = Math.min(100, (used / totalUren) * 100);
+    const color = remaining > 40 ? 'green' : remaining > 15 ? 'amber' : 'red';
+
+    document.getElementById('statsGrid').innerHTML = `
+      <div class="stat">
+        <div class="stat-label">Totale uren</div>
+        <div class="stat-value">${totalUren}</div>
+        <div class="stat-sub">dit jaar</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Opgenomen</div>
+        <div class="stat-value">${used.toFixed(2)}</div>
+        <div class="stat-sub">${Object.keys(verlofData).length} dag(en)</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Beschikbaar</div>
+        <div class="stat-value ${color}">${remaining.toFixed(2)}</div>
+        <div class="stat-sub">uren over</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Nog ±</div>
+        <div class="stat-value ${color}">${fullDays}</div>
+        <div class="stat-sub">volledige dag(en)</div>
+      </div>
+    `;
+
+    document.getElementById('progressPct').textContent = pct.toFixed(1) + '%';
+    const fill = document.getElementById('progressFill');
+    fill.style.width = pct.toFixed(1) + '%';
+    fill.style.background = remaining > 40 ? 'var(--accent)' : remaining > 15 ? 'var(--amber)' : 'var(--red)';
+
+    renderCalendar();
+    renderList();
+  }
+
+  function renderCalendar() {
+    document.getElementById('calTitle').textContent = MONTHS[curMonth] + ' ' + curYear;
+    const grid = document.getElementById('calGrid');
+    grid.innerHTML = '';
+
+    const first = new Date(curYear, curMonth, 1);
+    const last = new Date(curYear, curMonth + 1, 0);
+    let startDow = first.getDay(); if (startDow === 0) startDow = 7; startDow--;
+
+    for (let i = 0; i < startDow; i++) {
+      const el = document.createElement('div');
+      el.className = 'cal-cell empty-cell';
+      grid.appendChild(el);
+    }
+
+    for (let d = 1; d <= last.getDate(); d++) {
+      const date = new Date(curYear, curMonth, d);
+      const dateStr = toStr(date);
+      const isWe = date.getDay() === 0 || date.getDay() === 6;
+      const isPast = date < today;
+      const isTodayD = date.getTime() === today.getTime();
+      const isThuDay = date.getDay() === 4;
+      const vType = verlofData[dateStr]?.type;
+
+      const el = document.createElement('div');
+      el.className = 'cal-cell' +
+        (isWe ? ' weekend-cell' : '') +
+        (isPast ? ' past-cell' : '') +
+        (isTodayD ? ' today-cell' : '') +
+        (vType === 'full' ? ' has-verlof-full' : vType === 'half' ? ' has-verlof-half' : '');
+
+      const numEl = document.createElement('div');
+      numEl.className = 'day-num';
+      numEl.textContent = d;
+      el.appendChild(numEl);
+
+      if (vType) {
+        const badge = document.createElement('span');
+        badge.className = 'day-badge ' + (isThuDay ? 'badge-thu' : vType === 'full' ? 'badge-full' : 'badge-half');
+        badge.textContent = isThuDay ? 'do-vm' : vType === 'full' ? 'vol' : '½';
+        el.appendChild(badge);
+      } else if (isThuDay && !isWe) {
+        const badge = document.createElement('span');
+        badge.className = 'day-badge badge-thu';
+        badge.textContent = 'do-vm';
+        el.appendChild(badge);
+      }
+
+      if (!isWe && !isPast) el.onclick = () => openModal(dateStr);
+      grid.appendChild(el);
+    }
+  }
+
+  function renderList() {
+    const list = document.getElementById('verlofList');
+    const sorted = Object.entries(verlofData).sort(([a],[b]) => a.localeCompare(b));
+
+    if (sorted.length === 0) {
+      list.innerHTML = '<div class="empty-state">Nog geen verlof gepland — klik op een dag in de kalender.</div>';
+      return;
+    }
+
+    list.innerHTML = sorted.map(([date, v]) => {
+      const isThuDay = isThu(date);
+      const uren = hoursFor(date, v.type);
+      const typeLabel = isThuDay ? 'Donderdag voormiddag' : v.type === 'full' ? 'Volledige dag' : 'Halve dag';
+      return `
+        <div class="verlof-item">
+          <div class="verlof-info">
+            <span class="verlof-date">${formatDate(date)}</span>
+            <span class="verlof-type">${typeLabel}</span>
+          </div>
+          <span class="verlof-uren">${uren.toFixed(2)} u</span>
+          <button class="del-btn" onclick="deleteVerlof('${date}')" title="Verwijder">✕</button>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function openModal(dateStr) {
+    selectedDate = dateStr;
+    selectedOpt = null;
+    const existing = verlofData[dateStr];
+    modalMode = existing ? 'edit' : 'add';
+    if (existing) selectedOpt = existing.type;
+
+    const isThuDay = isThu(dateStr);
+    document.getElementById('modalTitle').textContent = existing ? 'Verlof aanpassen' : 'Verlof toevoegen';
+    document.getElementById('modalDateLabel').textContent = formatDate(dateStr);
+
+    const optsEl = document.getElementById('modalOpts');
+    if (isThuDay) {
+      optsEl.innerHTML = `
+        <button class="modal-opt selected" onclick="selectOpt('full',this)">
+          <div class="modal-opt-title">Voormiddag (donderdag)</div>
+          <div class="modal-opt-sub">${THU} uur</div>
+        </button>`;
+      selectedOpt = 'full';
+    } else {
+      optsEl.innerHTML = `
+        <button class="modal-opt ${existing?.type === 'full' ? 'selected' : ''}" onclick="selectOpt('full',this)">
+          <div class="modal-opt-title">Volledige dag</div>
+          <div class="modal-opt-sub">${FULL} uur</div>
+        </button>
+        <button class="modal-opt ${existing?.type === 'half' ? 'selected' : ''}" onclick="selectOpt('half',this)">
+          <div class="modal-opt-title">Halve dag</div>
+          <div class="modal-opt-sub">${HALF} uur</div>
+        </button>`;
+    }
+
+    const actionsEl = document.getElementById('modalActions');
+    if (existing) {
+      actionsEl.innerHTML = `
+        <button class="btn-cancel" onclick="closeModal()">Annuleer</button>
+        <button class="btn-delete" onclick="deleteVerlof('${dateStr}')">Verwijder</button>`;
+    } else {
+      actionsEl.innerHTML = `
+        <button class="btn-cancel" onclick="closeModal()">Annuleer</button>
+        <button class="btn-confirm" id="confirmBtn" onclick="saveVerlof()" ${selectedOpt ? '' : 'disabled'}>Bevestig</button>`;
+    }
+
+    document.getElementById('modalBackdrop').classList.add('open');
+  }
+
+  window.selectOpt = function(opt, btn) {
+    selectedOpt = opt;
+    document.querySelectorAll('.modal-opt').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    const cb = document.getElementById('confirmBtn');
+    if (cb) cb.disabled = false;
+  };
+
+  window.saveVerlof = async function() {
+    if (!selectedDate || !selectedOpt) return;
+    setSyncStatus('↑', 'var(--amber)');
+    await setDoc(doc(db, 'verlof', selectedDate), { type: selectedOpt });
+    closeModal();
+  };
+
+  window.deleteVerlof = async function(dateStr) {
+    setSyncStatus('↑', 'var(--amber)');
+    await deleteDoc(doc(db, 'verlof', dateStr));
+    closeModal();
+  };
+
+  window.closeModal = function() {
+    document.getElementById('modalBackdrop').classList.remove('open');
+    selectedDate = null; selectedOpt = null;
+  };
+
+  document.getElementById('modalBackdrop').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  window.changeMonth = function(dir) {
+    curMonth += dir;
+    if (curMonth > 11) { curMonth = 0; curYear++; }
+    if (curMonth < 0) { curMonth = 11; curYear--; }
+    renderCalendar();
+  };
+
+  // Auto-load from localStorage if config exists
+  (async function() {
+    const saved = localStorage.getItem('verlof_config');
+    const savedUren = localStorage.getItem('verlof_uren');
+    if (saved) {
+      const cfg = JSON.parse(saved);
+      document.getElementById('apiKey').value = cfg.apiKey;
+      document.getElementById('projectId').value = cfg.projectId;
+      document.getElementById('appId').value = cfg.appId;
+      if (savedUren) {
+        totalUren = parseFloat(savedUren);
+        document.getElementById('configUren').value = totalUren;
+      }
+      await window.startApp();
+    }
+  })();
+</script>
+</body>
+</html>
