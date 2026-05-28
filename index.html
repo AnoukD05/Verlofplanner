@@ -644,6 +644,13 @@
   const MONTHS = ['Januari','Februari','Maart','April','Mei','Juni','Juli','Augustus','September','Oktober','November','December'];
   const DAYS_NL = ['zondag','maandag','dinsdag','woensdag','donderdag','vrijdag','zaterdag'];
   const FULL = 7.70, HALF = 3.85, THU = 3.58;
+  const FULL_LABEL = "7u42min", HALF_LABEL = "3u51min", THU_LABEL = "3u35min";
+
+  function fmtUren(decimal) {
+    const h = Math.floor(decimal);
+    const m = Math.round((decimal - h) * 60);
+    return m === 0 ? h + 'u' : h + 'u' + m + 'min';
+  }
 
   let db, verlofData = {}, totalUren = 140;
   let curYear = new Date().getFullYear();
@@ -768,12 +775,12 @@
       </div>
       <div class="stat">
         <div class="stat-label">Opgenomen</div>
-        <div class="stat-value">${used.toFixed(2)}</div>
+        <div class="stat-value">${fmtUren(used)}</div>
         <div class="stat-sub">${Object.keys(verlofData).length} dag(en)</div>
       </div>
       <div class="stat">
         <div class="stat-label">Beschikbaar</div>
-        <div class="stat-value ${color}">${remaining.toFixed(2)}</div>
+        <div class="stat-value ${color}">${fmtUren(remaining)}</div>
         <div class="stat-sub">uren over</div>
       </div>
       <div class="stat">
@@ -864,7 +871,7 @@
             <span class="verlof-date">${formatDate(date)}</span>
             <span class="verlof-type">${typeLabel}</span>
           </div>
-          <span class="verlof-uren">${uren.toFixed(2)} u</span>
+          <span class="verlof-uren">${fmtUren(uren)}</span>
           <button class="del-btn" onclick="deleteVerlof('${date}')" title="Verwijder">✕</button>
         </div>
       `;
@@ -887,18 +894,18 @@
       optsEl.innerHTML = `
         <button class="modal-opt selected" onclick="selectOpt('full',this)">
           <div class="modal-opt-title">Voormiddag (donderdag)</div>
-          <div class="modal-opt-sub">${THU} uur</div>
+          <div class="modal-opt-sub">${THU_LABEL}</div>
         </button>`;
       selectedOpt = 'full';
     } else {
       optsEl.innerHTML = `
         <button class="modal-opt ${existing?.type === 'full' ? 'selected' : ''}" onclick="selectOpt('full',this)">
           <div class="modal-opt-title">Volledige dag</div>
-          <div class="modal-opt-sub">${FULL} uur</div>
+          <div class="modal-opt-sub">${FULL_LABEL}</div>
         </button>
         <button class="modal-opt ${existing?.type === 'half' ? 'selected' : ''}" onclick="selectOpt('half',this)">
           <div class="modal-opt-title">Halve dag</div>
-          <div class="modal-opt-sub">${HALF} uur</div>
+          <div class="modal-opt-sub">${HALF_LABEL}</div>
         </button>`;
     }
 
