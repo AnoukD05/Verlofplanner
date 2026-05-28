@@ -326,9 +326,9 @@
     }
 
     .cal-cell:nth-child(7n) { border-right: none; }
-    .cal-cell:hover:not(.empty-cell):not(.weekend-cell):not(.past-cell) { background: #F0EDE8; }
+    .cal-cell:hover:not(.empty-cell):not(.weekend-cell) { background: #F0EDE8; }
     .cal-cell.empty-cell, .cal-cell.weekend-cell { background: var(--cream); cursor: default; }
-    .cal-cell.past-cell { opacity: 0.4; cursor: default; }
+    .cal-cell.past-cell { opacity: 0.65; }
 
     .cal-cell.has-verlof-full { background: #E8F5EE; }
     .cal-cell.has-verlof-half { background: #EFF8F3; }
@@ -829,16 +829,16 @@
       if (vType) {
         const badge = document.createElement('span');
         badge.className = 'day-badge ' + (isThuDay ? 'badge-thu' : vType === 'full' ? 'badge-full' : 'badge-half');
-        badge.textContent = isThuDay ? 'do-vm' : vType === 'full' ? 'vol' : '½';
+        badge.textContent = vType === 'full' ? (isThuDay ? '½ dag' : 'vol') : '½ dag';
         el.appendChild(badge);
       } else if (isThuDay && !isWe) {
         const badge = document.createElement('span');
         badge.className = 'day-badge badge-thu';
-        badge.textContent = 'do-vm';
+        badge.textContent = '½ dag';
         el.appendChild(badge);
       }
 
-      if (!isWe && !isPast) el.onclick = () => openModal(dateStr);
+      if (!isWe) el.onclick = () => openModal(dateStr);
       grid.appendChild(el);
     }
   }
@@ -903,8 +903,8 @@
     const actionsEl = document.getElementById('modalActions');
     if (existing) {
       actionsEl.innerHTML = `
-        <button class="btn-cancel" onclick="closeModal()">Annuleer</button>
-        <button class="btn-delete" onclick="deleteVerlof('${dateStr}')">Verwijder</button>`;
+        <button class="btn-delete" onclick="deleteVerlof('${dateStr}')" style="flex:1">Verwijder</button>
+        <button class="btn-confirm" id="confirmBtn" onclick="saveVerlof()" style="flex:2">Opslaan</button>`;
     } else {
       actionsEl.innerHTML = `
         <button class="btn-cancel" onclick="closeModal()">Annuleer</button>
